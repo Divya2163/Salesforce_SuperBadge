@@ -1,0 +1,37 @@
+public class AccountProcessor {
+	@future 
+    public static void countContacts(List<Id> accountIds){
+        List<Account> accList =[Select Id, Number_Of_Contacts__c,(Select Id from Contacts) from Account where Id in: accountIds];
+            For(Account acc: accList){
+                acc.Number_of_Contacts__c=acc.Contacts.size();
+            }
+	update accList;
+            }  
+    }
+
+@isTest
+public class AccountProcessorTest {
+    public static testmethod void testAccountProcessor(){
+
+        Account a=new Account();
+        a.Name='Test Account';
+        insert a;
+
+        Contact con=new Contact();
+        con.FirstName='Divya';
+        con.LastName='Mohan';
+        con.AccountId=a.Id;
+
+        insert con;
+
+        List<Id> accListId=new List<Id>();
+        accListId.add(a.Id);
+
+        Test.startTest();
+        AccountProcessor.countContacts(accListId);
+        Test.stopTest();
+
+        Account acc=[Select Number_of_Contacts__c from Account where Id=: a.Id];
+        System.assertEquals(Integer.valueOf(acc.Number_Of_Contacts__c),1);
+    }
+}
